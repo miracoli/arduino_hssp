@@ -46,7 +46,7 @@
 // high during bulk erase, during each block write and during security write.
 // The timing of these programming steps should be verified as correct as part
 // of the validation process of the final program.
-#define USE_TP
+//#define USE_TP
 
 
 // ****************************************************************************
@@ -107,7 +107,7 @@
 // **** CY8C21x34 devices ****
 //#define CY8C21234
 //#define CY8C21334
-//#define CY8C21434
+#define CY8C21434  /*Default device selected. Comment this, and uncomment required Part number that needs to be programmed in your application */
 //#define CY8C21534
 //#define CY8C21634
 //#define CY8C21001
@@ -158,7 +158,7 @@
 //#define CY8C28623
 
 // **** CY8C29x66 devices ****
-#define CY8C29466  /*Default device selected. Comment this, and uncomment required Part number that needs to be programmed in your application */
+//#define CY8C29466
 //#define CY8C29566
 //#define CY8C29666
 //#define CY8C29866
