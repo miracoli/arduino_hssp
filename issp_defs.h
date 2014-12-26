@@ -1,5 +1,5 @@
 // filename: ISSP_Defs.h
-#include "ISSP_Revision.h"
+#include "issp_revision.h"
 #ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
@@ -36,7 +36,7 @@
 #ifndef INC_ISSP_DEFS
 #define INC_ISSP_DEFS
 
-#include "ISSP_directives.h"
+#include "issp_directives.h"
 
 // Block-Verify Uses 64-Bytes of RAM
 #define TARGET_DATABUFF_LEN    64 

@@ -1,5 +1,5 @@
 // filename: ISSP_Routines.c
-#include "ISSP_Revision.h"
+#include "issp_revision.h"
 #ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
@@ -36,12 +36,12 @@
 
 #include <m8c.h>        // part specific constants and macros
 #include "PSoCAPI.h"    // PSoC API definitions for all User Modules
-#include "ISSP_Defs.h"
-#include "ISSP_Vectors.h"
-#include "ISSP_Extern.h"
-#include "ISSP_Errors.h"
-#include "ISSP_Directives.h"
-#include "ISSP_Delays.h"
+#include "issp_defs.h"
+#include "issp_vectors.h"
+#include "issp_extern.h"
+#include "issp_errors.h"
+#include "issp_directives.h"
+#include "issp_delays.h"
 
 unsigned char  bTargetDataIN;
 unsigned char  abTargetDataOUT[TARGET_DATABUFF_LEN];

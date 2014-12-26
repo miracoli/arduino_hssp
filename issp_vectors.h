@@ -1,5 +1,5 @@
 // filename: ISSP_Vectors.h
-#include "ISSP_Revision.h"
+#include "issp_revision.h"
 #ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
@@ -36,7 +36,7 @@
 #ifndef INC_ISSP_VECTORS
 #define INC_ISSP_VECTORS
 
-#include "ISSP_directives.h"
+#include "issp_directives.h"
 
 // ------------------------- PSoC CY8CTST1x0 Devices ---------------------------
 // Modifying these tables is NOT recommendended. Doing so will all but

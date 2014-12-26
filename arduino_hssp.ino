@@ -1,5 +1,5 @@
 // filename: main.c
-#include "ISSP_Revision.h"
+#include "issp_revision.h"
 #ifdef PROJECT_REV_230
 /* Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
@@ -341,10 +341,10 @@
 
 // ------ Declarations Associated with ISSP Files & Routines -------
 //     Add these to your project as needed.
-#include "ISSP_extern.h"
-#include "ISSP_directives.h"
-#include "ISSP_defs.h"
-#include "ISSP_errors.h"
+#include "issp_extern.h"
+#include "issp_directives.h"
+#include "issp_defs.h"
+#include "issp_errors.h"
 /* ------------------------------------------------------------------------- */
 
 unsigned char bBankCounter;
