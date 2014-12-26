@@ -359,6 +359,8 @@ unsigned int  iChecksumTarget;
 /* ========================================================================= */
 void ErrorTrap(unsigned char bErrorNumber)
 {
+    Serial.print("Stuck in ErrorTrap. ErrorNumber: ");
+    Serial.println(bErrorNumber);
 #ifndef RESET_MODE
     // Set all pins to highZ to avoid back powering the PSoC through the GPIO
     // protection diodes.
@@ -371,12 +373,16 @@ void ErrorTrap(unsigned char bErrorNumber)
      // return(bErrorNumbers);
 }
 
+void setup()
+{
+}
+
 /* ========================================================================= */
 /* MAIN LOOP                                                                 */
 /* Based on the diagram in the AN2026                                        */
 /* ========================================================================= */
 
-void main(void)
+void loop()
 {
     // -- This example section of commands show the high-level calls to -------
     // -- perform Target Initialization, SilcionID Test, Bulk-Erase, Target ---
@@ -388,6 +394,7 @@ void main(void)
     
     // >>>> ISSP Programming Starts Here <<<<
     
+    Serial.println("Initialize the Host & Target for ISSP operations");
     // Acquire the device through reset or power cycle
     #ifdef RESET_MODE
     // Initialize the Host & Target for ISSP operations
@@ -402,6 +409,7 @@ void main(void)
     #endif
 
     // Run the SiliconID Verification, and proceed according to result.
+    Serial.println("Run the SiliconID Verification");
     if (fIsError = fVerifySiliconID()) { 
         ErrorTrap(fIsError);
     }
@@ -410,6 +418,7 @@ void main(void)
     #ifdef USE_TP
     SetTPHigh();    // Only used of Test Points are enabled  
     #endif
+    Serial.println("Bulk-Erase the Device.");
     if (fIsError = fEraseTarget()) {
         ErrorTrap(fIsError);
     }
@@ -419,6 +428,7 @@ void main(void)
 	
     // Program Flash blocks with predetermined data. In the final application
     // this data should come from the HEX output of PSoC Designer.
+    Serial.println("Program Flash blocks.");
     iChecksumData = 0;     // Calculte the device checksum as you go
     for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
     {
@@ -441,8 +451,10 @@ void main(void)
         }
     }
 	
+    Serial.println("Finished programming.");
     // Verify the data block-by-block after programming all of the blocks and
     // before setting security.
+    Serial.println("Verify the data");
     for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
     {
         #ifdef MULTI_BANK
@@ -459,6 +471,7 @@ void main(void)
 
     // Program security data into target PSoC. In the final application this 
     // data should come from the HEX output of PSoC Designer.
+    Serial.println("Program security data");
     for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
     {
         #ifdef MULTI_BANK
@@ -478,6 +491,7 @@ void main(void)
 	
     // Run the Target-Checksum Verification, and proceed according to result.
     // Checksum only valid if every Flash block is programed
+    Serial.println("Run the Target-Checksum Verification");
     #ifdef USE_TP
     SetTPHigh();    // Only used of Test Points are enabled
     #endif
@@ -505,6 +519,7 @@ void main(void)
     // Checksum Verified.
 
     // You may want to restart Your Target PSoC Here.
+    Serial.println("Success, restarting target");
     ReStartTarget();
  
     while(1) {
