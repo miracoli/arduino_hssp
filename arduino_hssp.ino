@@ -335,10 +335,6 @@
 //----------------------------------------------------------------------------
 */
 
-#include <m8c.h>        // part specific constants and macros
-#include "PSoCAPI.h"    // PSoC API definitions for all User Modules
-
-
 // ------ Declarations Associated with ISSP Files & Routines -------
 //     Add these to your project as needed.
 #include "issp_extern.h"

@@ -34,8 +34,6 @@
 //
 //--------------------------------------------------------------------------
 
-#include <m8c.h>        // part specific constants and macros
-#include "PSoCAPI.h"    // PSoC API definitions for all User Modules
 #include "issp_defs.h"
 #include "issp_errors.h"
 #include "issp_directives.h"
