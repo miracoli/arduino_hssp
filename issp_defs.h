@@ -122,6 +122,20 @@
     #define BLOCKS_PER_BANK             128
     #define SECURITY_BYTES_PER_BANK      32
 #endif
+// used for SDATA writing
+extern unsigned char bit;
+extern volatile unsigned char *out;
+// ****************************** PORT BIT MASKS ******************************
+// ****************************************************************************
+// ****                        PROCESSOR SPECIFIC                          ****
+// ****************************************************************************
+// ****                      USER ATTENTION REQUIRED                       ****
+// ****************************************************************************
+#define SDATA_PIN   9
+#define SCLK_PIN    8
+#define XRES_PIN    4
+#define TARGET_VDD  11
+#define TP_PIN      12
 #endif //(INC_ISSP_DEFS)
 #endif //(PROJECT_REV_)
 //end of file ISSP_Defs.h

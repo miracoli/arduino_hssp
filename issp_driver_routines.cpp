@@ -1,5 +1,6 @@
 // filename: ISSP_Driver_Routines.c
 #include "issp_revision.h"
+#include "Arduino.h"
 #ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
@@ -41,17 +42,6 @@
 extern    unsigned char    bTargetDataPtr;
 extern    unsigned char    abTargetDataOUT[TARGET_DATABUFF_LEN];
 
-// ****************************** PORT BIT MASKS ******************************
-// ****************************************************************************
-// ****                        PROCESSOR SPECIFIC                          ****
-// ****************************************************************************
-// ****                      USER ATTENTION REQUIRED                       ****
-// ****************************************************************************
-#define SDATA_PIN   0x01
-#define SCLK_PIN    0x02
-#define XRES_PIN    0x01
-#define TARGET_VDD  0x02
-#define TP_PIN      0x80
 // ((((((((((((((((((((((( DEMO ISSP SUBROUTINE SECTION )))))))))))))))))))))))
 // ((((( Demo Routines can be deleted in final ISSP project if not used   )))))
 // ((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))))
@@ -174,10 +164,7 @@ signed char fLoadSecurityData(unsigned char bBankNum)
 // ****************************************************************************
 unsigned char fSDATACheck(void)
 {
-    if(PRT1DR & SDATA_PIN)    
-        return(1);
-    else
-        return(0);
+    return digitalRead(SDATA_PIN);
 }
         
 
@@ -192,7 +179,7 @@ unsigned char fSDATACheck(void)
 // ****************************************************************************        
 void SCLKHigh(void)
 {
-    PRT1DR |= SCLK_PIN;
+    digitalWrite(SCLK_PIN, HIGH);
 }
 
 
@@ -207,7 +194,7 @@ void SCLKHigh(void)
 // ****************************************************************************
 void SCLKLow(void)
 {
-    PRT1DR &= ~SCLK_PIN;
+    digitalWrite(SCLK_PIN, LOW);
 }
 
 #ifndef RESET_MODE  // Only needed for power cycle mode
@@ -222,9 +209,8 @@ void SCLKLow(void)
 // ****************************************************************************
 void SetSCLKHiZ(void)
 {
-    PRT1DM0 &= ~SCLK_PIN;    
-    PRT1DM1 |=  SCLK_PIN;
-    PRT1DM2 &= ~SCLK_PIN;
+    pinMode(SCLK_PIN, INPUT);
+    digitalWrite(SCLK_PIN, LOW);
 }
 #endif
 
@@ -239,11 +225,17 @@ void SetSCLKHiZ(void)
 // ****************************************************************************
 void SetSCLKStrong(void)
 {
-    PRT1DM0 |=  SCLK_PIN;
-    PRT1DM1 &= ~SCLK_PIN;
-    PRT1DM2 &= ~SCLK_PIN;
+    pinMode(SCLK_PIN, OUTPUT);
 }
 
+// Arduinos digitalWrite function is to slow (violates timings), this is a workaround
+void digitalWriteSDATA(unsigned char val) {
+    if (val == LOW) {
+        *out &= ~bit;
+    } else {
+        *out |= bit;
+    }
+}
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
 // ****************************************************************************
@@ -256,7 +248,7 @@ void SetSCLKStrong(void)
 // ****************************************************************************
 void SetSDATAHigh(void)
 {
-    PRT1DR |= SDATA_PIN;
+    digitalWriteSDATA(HIGH);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -270,7 +262,7 @@ void SetSDATAHigh(void)
 // ****************************************************************************
 void SetSDATALow(void)
 {
-    PRT1DR &= ~SDATA_PIN;
+    digitalWriteSDATA(LOW);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -284,9 +276,8 @@ void SetSDATALow(void)
 // ****************************************************************************
 void SetSDATAHiZ(void)
 {
-    PRT1DM0 &= ~SDATA_PIN;    
-    PRT1DM1 |=  SDATA_PIN;
-    PRT1DM2 &= ~SDATA_PIN;
+    pinMode(SDATA_PIN, INPUT);
+    digitalWrite(SDATA_PIN, LOW);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -301,9 +292,7 @@ void SetSDATAHiZ(void)
 // ****************************************************************************
 void SetSDATAStrong(void)
 {
-    PRT1DM0 |=  SDATA_PIN;
-    PRT1DM1 &= ~SDATA_PIN;
-    PRT1DM2 &= ~SDATA_PIN;
+    pinMode(SDATA_PIN, OUTPUT);
 }
 
 #ifdef RESET_MODE
@@ -318,9 +307,7 @@ void SetSDATAStrong(void)
 // ****************************************************************************
 void SetXRESStrong(void)
 {
-    PRT2DM0 |=  XRES_PIN;
-    PRT2DM1 &= ~XRES_PIN;
-    PRT2DM2 &= ~XRES_PIN;
+    pinMode(XRES_PIN, OUTPUT);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -334,7 +321,7 @@ void SetXRESStrong(void)
 // ****************************************************************************
 void AssertXRES(void)
 {
-    PRT2DR |= XRES_PIN;    
+    digitalWrite(XRES_PIN, HIGH);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -348,7 +335,7 @@ void AssertXRES(void)
 // ****************************************************************************
 void DeassertXRES(void)
 {
-    PRT2DR &= ~XRES_PIN;
+    digitalWrite(XRES_PIN, LOW);
 }
 #else
 
@@ -363,9 +350,7 @@ void DeassertXRES(void)
 // ****************************************************************************
 void SetTargetVDDStrong(void)
 {
-    PRT2DM0 |=  TARGET_VDD;
-    PRT2DM1 &= ~TARGET_VDD;
-    PRT2DM2 &= ~TARGET_VDD;
+    pinMode(TARGET_VDD, OUTPUT);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -379,7 +364,7 @@ void SetTargetVDDStrong(void)
 // ****************************************************************************
 void ApplyTargetVDD(void)
 {
-    PRT2DR |= TARGET_VDD;    
+    digitalWrite(TARGET_VDD, HIGH);
 }
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -393,7 +378,7 @@ void ApplyTargetVDD(void)
 // ****************************************************************************
 void RemoveTargetVDD(void)
 {
-    PRT2DR &= ~TARGET_VDD;
+    digitalWrite(TARGET_VDD, LOW);
 }
 #endif
 
@@ -413,21 +398,19 @@ void RemoveTargetVDD(void)
 // ****************************************************************************
 void InitTP(void)
 {
-    PRT0DM0 |= TP_PIN;
-    PRT0DM1 &= ~TP_PIN;
-    PRT0DM2 &= ~TP_PIN;
+    pinMode(TP_PIN, OUTPUT);
 }
 void SetTPHigh(void)
 {
-    PRT0DR |= TP_PIN;
+    digitalWrite(TP_PIN, HIGH);
 }
 void SetTPLow(void)
 {
-    PRT0DR &= ~TP_PIN;
+    digitalWrite(TP_PIN, LOW);
 }
 void ToggleTP(void)
 {
-    PRT0DR ^= TP_PIN;
+    digitalWrite(TP_PIN, !digitalRead(TP_PIN));
 }
 #endif
 #endif  //(PROJECT_REV_)

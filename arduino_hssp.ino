@@ -373,8 +373,12 @@ void ErrorTrap(unsigned char bErrorNumber)
      // return(bErrorNumbers);
 }
 
+unsigned char bit;
+volatile unsigned char *out;
 void setup()
 {
+    bit = digitalPinToBitMask(SDATA_PIN);
+    out = portOutputRegister(digitalPinToPort(SDATA_PIN));
 }
 
 /* ========================================================================= */
