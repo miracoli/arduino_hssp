@@ -36,48 +36,26 @@
 #ifndef INC_ISSP_DELAYS
 #define INC_ISSP_DELAYS
 
-// The Delay() routine, in ISSP_Driver_Routines.c, has a delay of 2n+7 usec, 
-// where n is the value passed to the routine.  This is true for the m8c micro-
-// processor in the PSoC when it is running at a CPU clock of 12MHz.
-//
-// PROCESSOR_SPECIFIC
-// If another processor is used, or if the m8c is running at a slower clock
-// speed, then the delay parameters will be different. This file makes changing
-// the delays simpiler when porting the program to other processors.
-
-// DELAY_M is the slope of the Delay = Mx + B equation
-#define DELAY_M    2
-// DELAY_B is the offset of the delay in Delay = Mx + B.
-#define DELAY_B    7
-
-///////////////////////////////////////////////////////////////////////////////
-// CAUTION:
-// For the above parameters the minimum delay value is 7 (this would result in 
-// 0 being passed for a minimum delay. A value less than 7 would actually 
-// create a negative number, causing a very long delay
-///////////////////////////////////////////////////////////////////////////////
-
 // TRANSITION_TIMEOUT is a loop counter for a 100msec timeout when waiting for 
 // a high-to-low transition. This is used in the polling loop of 
-// fDetectHiLoTransition(). Each pass through the loop takes approximately 22
-// usec. 100 msec is about 4700 loops. 
-#define TRANSITION_TIMEOUT     4700
+// fDetectHiLoTransition().
+#define TRANSITION_TIMEOUT     100
 
 // XRES_DELAY is the time duration for which XRES is asserted. This defines
 // a 63 usec delay.
 // The minimum Xres time (from the device datasheet) is 10 usec.
-#define XRES_CLK_DELAY    ((63 - DELAY_B) / DELAY_M)
+#define XRES_CLK_DELAY    63
 
 // POWER_CYCLE_DELAY is the time required when power is cycled to the target
 // device to create a power reset after programming has been completed. The
 // actual time of this delay will vary from system to system depending on the
 // bypass capacitor size.  A delay of 150 usec is used here.
-#define POWER_CYCLE_DELAY ((150 - DELAY_B) / DELAY_M)
+#define POWER_CYCLE_DELAY 150
 
 // DELAY_100us delays 100 usec. This is used in fXRESInitializeTargetForISSP to
 // time the wait for Vdd to become stable after a power up.  A loop runs 10 of
 // these for a total delay of 1 msec.
-#define DELAY100us        ((100 - DELAY_B) / DELAY_M)
+#define DELAY100us        100
 
 #endif //(INC_ISSP_DELAYS)
 #endif //(PROJECT_REV_)

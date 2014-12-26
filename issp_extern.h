@@ -37,6 +37,7 @@
 #define INC_ISSP_EXTERN
 
 #include "issp_directives.h"
+#include "Arduino.h"
 
 extern signed char fXRESInitializeTargetForISSP(void);
 extern signed char fPowerCycleInitializeTargetForISSP(void);
@@ -55,7 +56,6 @@ extern void LoadArrayWithSecurityData(unsigned char, unsigned char, unsigned cha
 
 extern void LoadProgramData(unsigned char, unsigned char);
 extern signed char fLoadSecurityData(unsigned char);
-extern void Delay(unsigned char);
 extern unsigned char fSDATACheck(void);
 extern void SCLKHigh(void);
 extern void SCLKLow(void);

@@ -220,21 +220,21 @@ signed char fDetectHiLoTransition(void)
     // length of the SDATA Low-High-Low after certain commands.
 
     // Generate clocks for the target to pull SDATA High
-    iTimer = TRANSITION_TIMEOUT;
+    iTimer = millis() + TRANSITION_TIMEOUT;
     while(1) {
         SCLKLow();
         if (fSDATACheck())       // exit once SDATA goes HI
             break;
         SCLKHigh();
         // If the wait is too long then timeout
-        if (iTimer-- == 0) {
+        if (iTimer < millis()) {
 			return (ERROR);
         }
     }
 
 	
 	// Generate Clocks and wait for Target to pull SDATA Low again
-    iTimer = TRANSITION_TIMEOUT;              // reset the timeout counter
+    iTimer = millis() + TRANSITION_TIMEOUT;              // reset the timeout counter
     while(1) {
         SCLKLow();
         if (!fSDATACheck()) {   // exit once SDATA returns LOW 
@@ -242,7 +242,7 @@ signed char fDetectHiLoTransition(void)
         }
         SCLKHigh();
         // If the wait is too long then timeout
-        if (iTimer-- == 0) {
+        if (iTimer < millis()) {
             return (ERROR);
         }
     }
@@ -274,7 +274,7 @@ signed char fXRESInitializeTargetForISSP(void)
   
     // Cycle reset and put the device in programming mode when it exits reset
     AssertXRES();
-    Delay(XRES_CLK_DELAY);
+    delayMicroseconds(XRES_CLK_DELAY);
     DeassertXRES();
 
     // !!! NOTE: 
@@ -338,7 +338,7 @@ signed char fPowerCycleInitializeTargetForISSP(void)
     // wait 1msec for the power to stabilize
 
     for (n=0; n<10; n++) {
-        Delay(DELAY100us);
+        delayMicroseconds(DELAY100us);
     }
 
     // Set SCLK to high Z so there is no clock and wait for a high to low
@@ -582,7 +582,7 @@ void ReStartTarget(void)
 #ifdef RESET_MODE
     // Assert XRES, then release, then disable XRES-Enable
     AssertXRES();
-    Delay(XRES_CLK_DELAY);
+    delayMicroseconds(XRES_CLK_DELAY);
     DeassertXRES();
 #else
     // Set all pins to highZ to avoid back powering the PSoC through the GPIO
@@ -591,7 +591,7 @@ void ReStartTarget(void)
     SetSDATAHiZ();
     // Cycle power on the target to cause a reset
     RemoveTargetVDD();
-    Delay(POWER_CYCLE_DELAY);
+    delayMicroseconds(POWER_CYCLE_DELAY);
     ApplyTargetVDD();
 #endif
 }
