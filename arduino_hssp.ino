@@ -329,7 +329,6 @@
 #include "issp_extern.h"
 #include "issp_defs.h"
 #include "issp_errors.h"
-/* ------------------------------------------------------------------------- */
 
 unsigned char bBankCounter;
 unsigned int  iBlockCounter;
@@ -342,28 +341,6 @@ bool multi_bank = false;
 checksum_setup chksm_setup;
 program_block prgm_block;
 
-/* ========================================================================= */
-// ErrorTrap()
-// Return is not valid from main for PSOC, so this ErrorTrap routine is used.
-// For some systems returning an error code will work best. For those, the 
-// calls to ErrorTrap() should be replaced with a return(bErrorNumber). For
-// other systems another method of reporting an error could be added to this
-// function -- such as reporting over a communcations port.
-/* ========================================================================= */
-void ErrorTrap(unsigned char bErrorNumber)
-{
-    Serial.print("Stuck in ErrorTrap. ErrorNumber: ");
-    Serial.println(bErrorNumber);
-#ifndef RESET_MODE
-    // Set all pins to highZ to avoid back powering the PSoC through the GPIO
-    // protection diodes.
-    SetSCLKHiZ();   
-    SetSDATAHiZ();
-    // If Power Cycle programming, turn off the target
-    RemoveTargetVDD();
-#endif
-     while (1);
-     // return(bErrorNumbers);
 }
 
 unsigned char bit;
@@ -378,132 +355,33 @@ void setup()
   prgm_block = PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA;
 }
 
-/* ========================================================================= */
-/* MAIN LOOP                                                                 */
-/* Based on the diagram in the AN2026                                        */
-/* ========================================================================= */
 
-void loop()
-{
-    // -- This example section of commands show the high-level calls to -------
-    // -- perform Target Initialization, SilcionID Test, Bulk-Erase, Target ---
-    // -- RAM Load, FLASH-Block Program, and Target Checksum Verification. ----
     
-    // >>>> ISSP Programming Starts Here <<<<
     
-    Serial.println("Initialize the Host & Target for ISSP operations");
-    // Acquire the device through reset or power cycle
-    #ifdef RESET_MODE
-    // Initialize the Host & Target for ISSP operations
-    if (fIsError = fXRESInitializeTargetForISSP()) {		
-        ErrorTrap(fIsError);
     }
-    #else
-    // Initialize the Host & Target for ISSP operations
-    if (fIsError = fPowerCycleInitializeTargetForISSP()) {		
-        ErrorTrap(fIsError);
     }
-    #endif
 
-    // Run the SiliconID Verification, and proceed according to result.
-    Serial.println("Run the SiliconID Verification");
-    if (fIsError = fVerifySiliconID()) { 
-        ErrorTrap(fIsError);
     }
 	
-    // Bulk-Erase the Device.
-    Serial.println("Bulk-Erase the Device.");
-    if (fIsError = fEraseTarget()) {
-        ErrorTrap(fIsError);
     }
 	
-    // Program Flash blocks with predetermined data. In the final application
-    // this data should come from the HEX output of PSoC Designer.
-    Serial.println("Program Flash blocks.");
-    iChecksumData = 0;     // Calculte the device checksum as you go
-    for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
-    {
-        #ifdef MULTI_BANK
-        // Set the bank number
-        SetBankNumber(bBankCounter);
-        #endif        
-        for (iBlockCounter=0; iBlockCounter<BLOCKS_PER_BANK; iBlockCounter++) {
-            LoadProgramData((unsigned char)iBlockCounter, bBankCounter);
-            iChecksumData += iLoadTarget();
-            if (fIsError = fProgramTargetBlock(bBankCounter,(unsigned char)iBlockCounter)) {
-                ErrorTrap(fIsError);				
             }
         }
     }
 	
-    Serial.println("Finished programming.");
-    // Verify the data block-by-block after programming all of the blocks and
-    // before setting security.
-    Serial.println("Verify the data");
-    for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
-    {
-        #ifdef MULTI_BANK
-        // Set the bank number
-        SetBankNumber(bBankCounter);
-        #endif        
-        for (iBlockCounter=0; iBlockCounter<BLOCKS_PER_BANK; iBlockCounter++) {
-            LoadProgramData((unsigned char)iBlockCounter, bBankCounter);
-            if (fIsError = fVerifyTargetBlock(bBankCounter,(unsigned char)iBlockCounter)) {
-                ErrorTrap(fIsError);
             }
         }
     }
 
-    // Program security data into target PSoC. In the final application this 
-    // data should come from the HEX output of PSoC Designer.
-    Serial.println("Program security data");
-    for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
-    {
-        #ifdef MULTI_BANK
-        // Set the bank number
-        SetBankNumber(bBankCounter);
-        #endif        
-
-        // Load one bank of security data from hex file into buffer
-        if (fIsError = fLoadSecurityData(bBankCounter)) {
-            ErrorTrap(fIsError);
         }
-        // Secure one bank of the target flash
-        if (fIsError = fSecureTargetFlash()) {
-            ErrorTrap(fIsError);
         }
     }
 	
-    // Run the Target-Checksum Verification, and proceed according to result.
-    // Checksum only valid if every Flash block is programed
-    Serial.println("Run the Target-Checksum Verification");
-    iChecksumTarget = 0;
-    for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
-    {
-        #ifdef MULTI_BANK
-        // Set the bank number
-        SetBankNumber(bBankCounter);
-        #endif        
-        if (fIsError = fAccTargetBankChecksum(&iChecksumTarget)) {
-            ErrorTrap(fIsError);
         }
     }    
-    if (iChecksumTarget != iChecksumData)
-        ErrorTrap(VERIFY_ERROR);
 
     
-    // *** SUCCESS *** 
-    // At this point, the Target has been successfully Initialize, ID-Checked,
-    // Bulk-Erased, Block-Loaded, Block-Programmed, Block-Verified, and Device-
-    // Checksum Verified.
-
-    // You may want to restart Your Target PSoC Here.
-    Serial.println("Success, restarting target");
-    ReStartTarget();
  
-    while(1) {
-        // Continue with other functions or return to the calling routine		
     }
 } 
-// end of main()
 
