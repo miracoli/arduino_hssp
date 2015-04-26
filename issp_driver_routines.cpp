@@ -74,13 +74,13 @@ void InitTargetTestData(unsigned char bBlockNum, unsigned char bBankNum)
 //   bType   - the security data to write over the range defined by bStart and
 //             bLength
 // ============================================================================
-void LoadArrayWithSecurityData(unsigned char bStart, unsigned char bLength, unsigned char bType)
+/*void LoadArrayWithSecurityData(unsigned char bStart, unsigned char bLength, unsigned char bType)
 {
     // Now, write the desired security-bytes for the range specified
     for (bTargetDataPtr = bStart; bTargetDataPtr < bLength; bTargetDataPtr++) {
         abTargetDataOUT[bTargetDataPtr] = bType;
     }
-}
+}*/
 
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
@@ -132,7 +132,7 @@ void LoadProgramData(unsigned char bBlockNum, unsigned char bBankNum)
 // This function always returns PASS. The flag return is reserving
 // functionality for non-demo versions.
 // ****************************************************************************
-signed char fLoadSecurityData(unsigned char bBankNum)
+/*signed char fLoadSecurityData(unsigned char bBankNum)
 {
     // >>> The following call is for demo use only. <<<
     // Function LoadArrayWithSecurityData fills buffer for demo
@@ -142,7 +142,7 @@ signed char fLoadSecurityData(unsigned char bBankNum)
     // Error checking should be added for the final version as noted above.
     // For demo use this function just returns PASS.
     return(PASS);
-}
+}*/
 
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************

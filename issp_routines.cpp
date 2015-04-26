@@ -670,7 +670,7 @@ signed char fVerifyTargetBlock(unsigned char bBankNumber, unsigned char bBlockNu
 //     0 if successful
 //     SECURITY_ERROR if timed out on handshake to the device.
 // ============================================================================
-signed char fSecureTargetFlash(void)
+/*signed char fSecureTargetFlash(void)
 {
 unsigned char bTemp;
 
@@ -697,6 +697,5 @@ unsigned char bTemp;
     }
     SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);
     return(PASS);
-}
-
+}*/
 
