@@ -1,7 +1,7 @@
 # arduino_hssp
 PSoC® 1 Device Programming using an Arduino
 
-This is a port of the code found at http://www.cypress.com/?rID=2906 (AN44168) to the Arduino platform.
+This is a port of the code found at http://www.cypress.com/?rID=2906 (AN44168, Revision 2.30) to the Arduino platform.
 It will write and verify ascending hex values to a PSoC® 1 Device connected to an Arduino running this code.
 
 A desktop application for sending the Arduino a .hex file is planned as next step.

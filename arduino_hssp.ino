@@ -1,6 +1,3 @@
-// filename: main.c
-#include "issp_revision.h"
-#ifdef PROJECT_REV_230
 /* Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
 // This software is owned by Cypress Semiconductor Corporation (Cypress)
@@ -532,5 +529,3 @@ void loop()
 } 
 // end of main()
 
-#endif  //(PROJECT_REV_)
-// end of file main.c

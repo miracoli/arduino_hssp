@@ -1,6 +1,3 @@
-// filename: ISSP_Vectors.h
-#include "issp_revision.h"
-#ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
 // This software is owned by Cypress Semiconductor Corporation (Cypress)
@@ -631,5 +628,4 @@
     };
 
 #endif  //(INC_ISSP_VECTORS)
-#endif  //(PROJECT_REV_)
-//end of file ISSP_Vectors.h
+

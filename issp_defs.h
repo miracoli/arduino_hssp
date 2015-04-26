@@ -1,6 +1,3 @@
-// filename: ISSP_Defs.h
-#include "issp_revision.h"
-#ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
 // This software is owned by Cypress Semiconductor Corporation (Cypress)
@@ -137,5 +134,4 @@ extern volatile unsigned char *out;
 #define TARGET_VDD  11
 #define TP_PIN      12
 #endif //(INC_ISSP_DEFS)
-#endif //(PROJECT_REV_)
-//end of file ISSP_Defs.h
+

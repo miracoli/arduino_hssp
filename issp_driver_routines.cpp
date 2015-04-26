@@ -1,7 +1,4 @@
-// filename: ISSP_Driver_Routines.c
-#include "issp_revision.h"
 #include "Arduino.h"
-#ifdef PROJECT_REV_230
 // Copyright 2006-2010, Cypress Semiconductor Corporation.
 //
 // This software is owned by Cypress Semiconductor Corporation (Cypress)
@@ -413,5 +410,3 @@ void ToggleTP(void)
     digitalWrite(TP_PIN, !digitalRead(TP_PIN));
 }
 #endif
-#endif  //(PROJECT_REV_)
-//end of file ISSP_Drive_Routines.c
