@@ -381,12 +381,61 @@ signed char fPowerCycleInitializeTargetForISSP(void)
     return(PASS);
 }
 
+void setAddress(unsigned char bBankNumber, unsigned char bBlockNumber) {
+  SendVector(set_block_number, 11);
 
+  // Set the drive here because SendByte() does not
+  SetSDATAStrong();
+  SendByte(bBlockNumber,8);
+  SendByte(set_block_number_end, 3);
 
+  SendVector(verify_setup_v, num_bits_verify_setup);
+  if (fIsError = fDetectHiLoTransition()) {
+    //Serial.print((char)STK_FAILED);
+     // return(BLOCK_ERROR); // TODO
+  }
+  SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);
+}
 
+uint8_t readByte(uint8_t bTargetAddress) {
+  //Send Read Byte vector and then get a byte from Target
+  SendVector(read_byte_v, 5);
+  // Set the drive here because SendByte() does not
+  SetSDATAStrong();
+  SendByte(bTargetAddress << 2,6);
 
+  RunClock(2);       // Run two SCLK cycles between writing and reading
+  SetSDATAHiZ();     // Set to HiZ so Target can drive SDATA
+  bTargetDataIN = bReceiveByte();
 
+  RunClock(1);
+  SendVector(read_byte_v + 1, 1);     // Send the ReadByte Vector End
+  return bTargetDataIN;
+}
 
+int8_t getSiliconID(uint8_t * buff) {
+  // Send ID-Setup vector set
+  SendVector(id_setup_v, num_bits_id_setup);
+  if (fIsError = fDetectHiLoTransition()) {
+    return(SiID_ERROR);
+  }
+  SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);     
+
+  //Send Read ID vector and get Target ID
+  SendVector(read_id_v, 11);      // Read-MSB Vector is the first 11-Bits
+  RunClock(2);                    // Two SCLK cycles between write & read
+  buff[0] = bReceiveByte();
+  RunClock(1);
+  SendVector(read_id_v+2, 12);    // 12 bits starting from the 3rd character
+
+  RunClock(2);                    // Read-LSB Command
+  buff[1] = bReceiveByte();
+
+  RunClock(1);
+  SendVector(read_id_v+4, 1);     // 1 bit starting from the 5th character
+  
+  return 0;
+}
 
 // ============================================================================
 // fEraseTarget()
