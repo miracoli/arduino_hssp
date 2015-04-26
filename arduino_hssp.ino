@@ -341,47 +341,316 @@ bool multi_bank = false;
 checksum_setup chksm_setup;
 program_block prgm_block;
 
+// STK Definitions
+#define STK_OK      0x10
+#define STK_FAILED  0x11
+#define STK_UNKNOWN 0x12
+#define STK_INSYNC  0x14
+#define STK_NOSYNC  0x15
+#define CRC_EOP     0x20 //ok it is a space...
+
+#define HWVER 2
+#define SWMAJ 1
+#define SWMIN 18
+
+uint8_t getch() {
+  while(!Serial.available());
+  return Serial.read();
 }
 
+int error=0;
+int pmode=0;
+int here;
+uint8_t buff[256]; // global block storage
+
+#define beget16(addr) (*addr * 256 + *(addr+1) )
+typedef struct param {
+  uint8_t devicecode;
+  uint8_t revision;
+  uint8_t progtype;
+  uint8_t parmode;
+  uint8_t polling;
+  uint8_t selftimed;
+  uint8_t lockbytes;
+  uint8_t fusebytes;
+  int flashpoll;
+  int eeprompoll;
+  int pagesize;
+  int eepromsize;
+  int flashsize;
+}
+parameter;
+
+parameter param;
+
+void empty_reply() {
+  if (CRC_EOP == getch()) {
+    Serial.print((char)STK_INSYNC);
+    Serial.print((char)STK_OK);
+  } 
+  else {
+    error++;
+    Serial.print((char)STK_NOSYNC);
+  }
+}
+    
+void breply(uint8_t b) {
+  if (CRC_EOP == getch()) {
+    Serial.print((char)STK_INSYNC);
+    Serial.print((char)b);
+    Serial.print((char)STK_OK);
+  } 
+  else {
+    error++;
+    Serial.print((char)STK_NOSYNC);
+  }
+}
+    
+void fill(int n) {
+  for (int x = 0; x < n; x++) {
+    buff[x] = getch();
+    }
+    }
+
+void get_version(uint8_t c) {
+  switch(c) {
+  case 0x80:
+    breply(HWVER);
+    break;
+  case 0x81:
+    breply(SWMAJ);
+    break;
+  case 0x82:
+    breply(SWMIN);
+    break;
+  case 0x93:
+    breply('S'); // serial programmer
+    break;
+  case 0x84:
+    breply(50);
+  default:
+    breply(0);
+  }
+}
+
+void set_parameters() {
+  // call this after reading paramter packet into buff[]
+  // TODO
+  /* param.devicecode = buff[0];
+   param.revision   = buff[1];
+   param.progtype   = buff[2];
+   param.parmode    = buff[3];
+   param.polling    = buff[4];
+   param.selftimed  = buff[5];
+   param.lockbytes  = buff[6];
+   param.fusebytes  = buff[7];
+   param.flashpoll  = buff[8]; 
+   // ignore buff[9] (= buff[8])
+   // following are 16 bits (big endian)
+   param.eeprompoll = beget16(&buff[10]);
+   param.pagesize   = beget16(&buff[12]);
+   param.eepromsize = beget16(&buff[14]);
+   
+   // 32 bits flashsize (big endian)
+   param.flashsize = buff[16] * 0x01000000
+   + buff[17] * 0x00010000
+   + buff[18] * 0x00000100
+   + buff[19];
+   */
+    }
+	
+void end_pmode() {
+  ReStartTarget();
+    }
+	
+int8_t erase_chip() {
+  return fEraseTarget();
+            }
+
+// Initialize the Host & Target for ISSP operations
+int8_t start_pmode() {
+  // Acquire the device through reset or power cycle
+  int8_t result;
+  if(prog_mode == RESET_MODE) {
+    result = fXRESInitializeTargetForISSP();
+  } 
+  else {
+    result = fPowerCycleInitializeTargetForISSP();
+        }
+  pmode = 1;
+  return result;
+    }
+	
+void read_signature() {
+  if (CRC_EOP != getch()) {
+    error++;
+    Serial.print((char) STK_NOSYNC);
+    return;
+            }
+
+  if(getSiliconID(buff)) {
+    Serial.print((char) STK_FAILED);
+    return;
+        }
+  Serial.print((char) STK_INSYNC);
+  Serial.print((char) buff[0]);
+  Serial.print((char) buff[1]);
+  Serial.print((char) STK_OK);
+    }
+
+char flash_read_page(int length) {
+  for (uint8_t x = 0; x < length; x++) {
+    Serial.write(readByte(x));
+  }
+  return STK_OK;
+}
+
+void read_page() {
+  char result = (char)STK_FAILED;
+  int length = 256 * getch();
+  length += getch();
+  char memtype = getch();
+  if (CRC_EOP != getch()) {
+    error++;
+    Serial.print((char) STK_NOSYNC);
+    return;
+  }
+  Serial.print((char) STK_INSYNC);
+  if (memtype == 'F') result = flash_read_page(length);
+
+  Serial.print(result);
+  return;
+        }
+
+uint8_t write_flash_pages(int length) {
+  //InitTargetTestData(buff);
+  for (bTargetDataPtr = 0; bTargetDataPtr < TARGET_DATABUFF_LEN; bTargetDataPtr++) {
+    abTargetDataOUT[bTargetDataPtr] = buff[bTargetDataPtr] ;
+        }
+  iLoadTarget();
+  fProgramTargetBlock(0,here);
+  return STK_OK;
+    }
+	
+void write_flash(int length) {
+  fill(length);
+  if (CRC_EOP == getch()) {
+    Serial.print((char) STK_INSYNC);
+    Serial.print((char) write_flash_pages(length));
+  } 
+  else {
+    error++;
+    Serial.print((char) STK_NOSYNC);
+        }
+    }    
+
+void program_page() {
+  int length = 256 * getch();
+  length += getch();
+  char memtype = getch();
+  // flash memory @here, (length) bytes
+  if (memtype == 'F') {
+    write_flash(length);
+    return;
+  } else {
+    error++;
+    Serial.print((char) STK_NOSYNC);
+  }
+  Serial.print((char)STK_FAILED);
+  return;
+}
+    
 unsigned char bit;
 volatile unsigned char *out;
 void setup()
 {
-    bit = digitalPinToBitMask(SDATA_PIN);
-    out = portOutputRegister(digitalPinToPort(SDATA_PIN));
+  bit = digitalPinToBitMask(SDATA_PIN);
+  out = portOutputRegister(digitalPinToPort(SDATA_PIN));
   prog_mode = POWER_CYCLE_MODE;
   targ_voltage = TARGET_VOLTAGE_5V;
   chksm_setup = CHECKSUM_SETUP_21_23_27_TST110_TMG110;
   prgm_block = PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA;
+  Serial.begin(57600);
 }
 
-
-    
-    
-    }
-    }
-
-    }
-	
-    }
-	
-            }
-        }
-    }
-	
-            }
-        }
-    }
-
-        }
-        }
-    }
-	
-        }
-    }    
-
-    
+void loop() {
+  if (Serial.available()) {
+    avrisp();
+  }
+}
  
+int avrisp() { 
+  uint8_t data, low, high;
+  uint8_t ch = getch();
+  switch (ch) {
+  case '0': // signon
+    error = 0;
+    empty_reply();
+    break;
+  case '1':
+    if (getch() == CRC_EOP) {
+      Serial.print((char) STK_INSYNC);
+      Serial.print("AVR ISP");
+      Serial.print((char) STK_OK);
     }
+    break;
+  case 'A':
+    get_version(getch());
+    break;
+  case 'B':
+    fill(20);
+    set_parameters();
+    empty_reply();
+    break;
+  case 'E': // extended parameters - ignore for now
+    fill(5);
+    empty_reply();
+    break;
+  case 'P':
+    start_pmode();
+    empty_reply();
+    break;
+  case 'R':
+    erase_chip();
+    empty_reply();
+    break;
+  case 'U': // set address (word)
+    here = getch();
+    here += 256 * getch();
+    here /= 64;
+    setAddress(0, (here)); // TODO support for multiple banks
+    empty_reply();
+    break;
+  case 0x64: //STK_PROG_PAGE
+    program_page();
+    break;
+  case 0x74: //STK_READ_PAGE 't'
+    read_page();    
+    break;
+  case 'Q': //0x51
+    error=0;
+    end_pmode();
+    empty_reply();
+    break;
+  case 0x75: //STK_READ_SIGN 'u'
+    read_signature();
+    break;
+
+    // expecting a command, not CRC_EOP
+    // this is how we can get back in sync
+  case CRC_EOP:
+    error++;
+    Serial.print((char) STK_NOSYNC);
+    break;
+
+    // anything else we will return STK_UNKNOWN
+  default:
+    error++;
+    if (CRC_EOP == getch()) 
+      Serial.print((char)STK_UNKNOWN);
+    else
+      Serial.print((char)STK_NOSYNC);
 } 
+}
+
 
