@@ -33,6 +33,9 @@
 #ifndef INC_ISSP_EXTERN
 #define INC_ISSP_EXTERN
 
+// Block-Verify Uses 64-Bytes of RAM
+#define TARGET_DATABUFF_LEN    64 
+
 #include "Arduino.h"
 
 extern signed char fXRESInitializeTargetForISSP(void);
@@ -40,17 +43,14 @@ extern signed char fPowerCycleInitializeTargetForISSP(void);
 extern signed char fEraseTarget(void);
 extern unsigned int iLoadTarget(void);
 extern void ReStartTarget(void);
-extern signed char fVerifySiliconID(void);
 extern signed char fAccTargetBankChecksum(unsigned int*);
 extern void SetBankNumber(unsigned char);
 extern signed char fProgramTargetBlock(unsigned char, unsigned char);
 extern signed char fVerifyTargetBlock(unsigned char, unsigned char);
 extern signed char fSecureTargetFlash(void);
 
-extern void InitTargetTestData(void);
 extern void LoadArrayWithSecurityData(unsigned char, unsigned char, unsigned char);
 
-extern void LoadProgramData(unsigned char, unsigned char);
 extern signed char fLoadSecurityData(unsigned char);
 extern unsigned char fSDATACheck(void);
 extern void SCLKHigh(void);
@@ -106,6 +106,9 @@ enum program_block {
   PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA, // CY8C21xxx, CY8C21x45, CY8C22x45, CY8C23x33, CY8C24x23A, CY8C24x94, CY8C28xxx, CY8C29x66, TST1x0, TMG1x0, & TMA120 Program Block Vectors 
   PROGRAM_BLOCK_27 //  CY8C27x43 Program Block Vectors
 } extern prgm_block;
+
+extern    unsigned char    bTargetDataPtr;
+extern    unsigned char    abTargetDataOUT[TARGET_DATABUFF_LEN];
 
 #endif  //(INC_ISSP_EXTERN)
 

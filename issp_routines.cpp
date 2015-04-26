@@ -382,41 +382,10 @@ signed char fPowerCycleInitializeTargetForISSP(void)
 }
 
 
-// ============================================================================
-// fVerifySiliconID()
-// Returns:
-//     0 if successful
-//     Si_ID if timed out on handshake to the device.
-// ============================================================================
-signed char fVerifySiliconID(void)
-{
-    // Send ID-Setup vector set
-    SendVector(id_setup_v, num_bits_id_setup);
-    if (fIsError = fDetectHiLoTransition()) {
-        return(SiID_ERROR);
-    }
-    SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);     
 
-    //Send Read ID vector and get Target ID
-    SendVector(read_id_v, 11);      // Read-MSB Vector is the first 11-Bits
-    RunClock(2);                    // Two SCLK cycles between write & read
-    bTargetID[0] = bReceiveByte();
-    RunClock(1);
-    SendVector(read_id_v+2, 12);    // 12 bits starting from the 3rd character
 
-    RunClock(2);                    // Read-LSB Command
-    bTargetID[1] = bReceiveByte();
 
-    RunClock(1);
-    SendVector(read_id_v+4, 1);     // 1 bit starting from the 5th character
 
-    if (bTargetID[0] != target_id_v[0] || bTargetID[1] != target_id_v[1]) {
-        return(SiID_ERROR);
-    }
-    else {
-        return(PASS);
-    }
-}
 
 
 // ============================================================================
