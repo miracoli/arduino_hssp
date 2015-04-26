@@ -33,8 +33,6 @@
 #ifndef INC_ISSP_VECTORS
 #define INC_ISSP_VECTORS
 
-#include "issp_directives.h"
-
 // ------------------------- PSoC CY8CTST1x0 Devices ---------------------------
 // Modifying these tables is NOT recommendended. Doing so will all but
 // guarantee an ISSP error, unless updated vectors have been recommended or
@@ -286,96 +284,26 @@
     unsigned char target_id_v[] = {0x00, 0x2E};     //ID for CY8C29002
 #endif
 
+const unsigned int num_bits_checksum = 286;
+unsigned char checksum_v[] =
+{
+    0xDE, 0xE0, 0x1F, 0x7B, 0x00, 0x79, 0xF0, 0x75,
+    0xE7, 0xC8, 0x1F, 0xDE, 0xA0, 0x1F, 0x7A, 0x01,
+    0xF9, 0xF7, 0x01, 0xF7, 0xC9, 0x87, 0xDF, 0x48,
+    0x1E, 0x7D, 0x00, 0x7D, 0xE0, 0x0F, 0xF7, 0xC0,
+    0x07, 0xDF, 0xE2, 0x5C
+};
 
-// ---- CY8C21x23, CY8C21x34, CY8C23x33, CY8C27x43, TST110 & TMG110 Checksum Setup Vectors ----
-// Modifying these tables is NOT recommendended. Doing so will all but
-// guarantee an ISSP error, unless updated vectors have been recommended or
-// provided by Cypress Semiconductor.
-// ---------------------------------------------------------------------------------
-#ifdef CHECKSUM_SETUP_21_23_27_TST110_TMG110
-    const unsigned int num_bits_checksum = 286;
-    const unsigned char checksum_v[] =
-    {
-        0xDE, 0xE0, 0x1F, 0x7B, 0x00, 0x79, 0xF0, 0x75,
-        0xE7, 0xC8, 0x1F, 0xDE, 0xA0, 0x1F, 0x7A, 0x01,
-        0xF9, 0xF7, 0x01, 0xF7, 0xC9, 0x87, 0xDF, 0x48,
-        0x1E, 0x7D, 0x00, 0x7D, 0xE0, 0x0F, 0xF7, 0xC0,
-        0x07, 0xDF, 0xE2, 0x5C
-    };
-#endif
+const unsigned int num_bits_program_block = 308;
+unsigned char program_block[] =
+{
+    0x9F, 0x8A, 0x9E, 0x7F, 0x2B, 0x7D, 0xEE, 0x01,
+    0xF7, 0xB0, 0x07, 0x9F, 0x07, 0x5E, 0x7C, 0x81,
+    0xFD, 0xEA, 0x01, 0xF7, 0xA0, 0x1F, 0x9F, 0x70,
+    0x1F, 0x7C, 0x98, 0x7D, 0xF4, 0x81, 0xF7, 0x80,
+    0x17, 0xDF, 0x00, 0x1F, 0x7F, 0x89, 0x70
+};
 
-
-// -------------- CY8C24x23 & CY8C24x23A Checksum Setup Vectors ---------------
-// Modifying these tables is NOT recommendended. Doing so will all but
-// guarantee an ISSP error, unless updated vectors have been recommended or
-// provided by Cypress Semiconductor.
-// ----------------------------------------------------------------------------
-#ifdef CHECKSUM_SETUP_24_24A
-    const unsigned int num_bits_checksum = 286;
-    const unsigned char checksum_v[] =
-    {
-        0xDE, 0xE0, 0x1F, 0x7B, 0x00, 0x79, 0xF0, 0x75,
-        0xE7, 0xC8, 0x1F, 0xDE, 0xA0, 0x1F, 0x7A, 0x01,
-        0xF9, 0xF7, 0x01, 0xF7, 0xC9, 0x87, 0xDF, 0x48,
-        0x1E, 0x7D, 0x20, 0x7D, 0xE0, 0x0F, 0xF7, 0xC0,
-        0x07, 0xDF, 0xE2, 0x5C
-    };
-#endif
-
-
-// ---- CY8C21x45,CY8C22x45,CY8C24x94, CY8C28xxx, CY8C29x66, TST120, TMG120, & TMA120 Checksum Setup Vectors ----
-// Modifying these tables is NOT recommendended. Doing so will all but
-// guarantee an ISSP error, unless updated vectors have been recommended or
-// provided by Cypress Semiconductor.
-// ------------------------------------------------------------------------------------------
-#ifdef CHECKSUM_SETUP_22_24_28_29_TST120_TMG120_TMA120
-    const unsigned int num_bits_checksum = 286;
-    const unsigned char checksum_v[] =
-    {
-        0xDE, 0xE0, 0x1F, 0x7B, 0x00, 0x79, 0xF0, 0x75,
-        0xE7, 0xC8, 0x1F, 0xDE, 0xA0, 0x1F, 0x7A, 0x01,
-        0xF9, 0xF6, 0x01, 0xF7, 0xC9, 0x87, 0xDF, 0x48,
-        0x1E, 0x7D, 0x40, 0x7D, 0xE0, 0x0F, 0xF7, 0xC0,
-        0x07, 0xDF, 0xE2, 0x5C
-    };
-#endif
-
-
-// ---- CY8C21xxx, CY8C21x45, CY8C22x45, CY8C23x33, CY8C24x23A, CY8C24x94, CY8C28xxx, CY8C29x66, TST1x0, TMG1x0, & TMA120 Program Block Vectors ----
-// Modifying these tables is NOT recommendended. Doing so will all but
-// guarantee an ISSP error, unless updated vectors have been recommended or
-// provided by Cypress Semiconductor.
-// ----------------------------------------------------------------------------------------------------------------
-#ifdef PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA
-    const unsigned int num_bits_program_block = 308;
-    const unsigned char program_block[] =
-    {
-        0x9F, 0x8A, 0x9E, 0x7F, 0x2B, 0x7D, 0xEE, 0x01,
-        0xF7, 0xB0, 0x07, 0x9F, 0x07, 0x5E, 0x7C, 0x81,
-        0xFD, 0xEA, 0x01, 0xF7, 0xA0, 0x1F, 0x9F, 0x70,
-        0x1F, 0x7C, 0x98, 0x7D, 0xF4, 0x81, 0xF7, 0x80,
-        0x17, 0xDF, 0x00, 0x1F, 0x7F, 0x89, 0x70
-
-    };
-#endif
-
-// --------------------- CY8C27x43 Program Block Vectors-----------------------
-// Modifying these tables is NOT recommendended. Doing so will all but
-// guarantee an ISSP error, unless updated vectors have been recommended or
-// provided by Cypress Semiconductor.
-// ----------------------------------------------------------------------------
-#ifdef PROGRAM_BLOCK_27
-    const unsigned int num_bits_program_block = 308;
-    
-    const unsigned char program_block[] =
-    {
-        0x9F, 0x82, 0xBE, 0x7F, 0x2B, 0x7D, 0xEE, 0x01,
-        0xF7, 0xB0, 0x07, 0x9F, 0x07, 0x5E, 0x7C, 0x81,
-        0xFD, 0xEA, 0x01, 0xF7, 0xA0, 0x1F, 0x9F, 0x70,
-        0x1F, 0x7C, 0x98, 0x7D, 0xF4, 0x81, 0xF7, 0x80,
-        0x17, 0xDF, 0x00, 0x1F, 0x7F, 0x89, 0x70
-    };
-#endif
 
 // ----------------------------- General PSoC Vectors--------------------------
 // Modifying these tables is NOT recommendended. Doing so will all but
@@ -474,10 +402,9 @@
 
     const unsigned char    set_block_number[] = {0x9F, 0x40, 0xE0};
     const unsigned char    set_block_number_end = 0xE0;
-#ifdef MULTI_BANK
+
     const unsigned char    set_bank_number[] = {0xDE, 0xE2, 0x1F, 0x7D, 0x00};
     const unsigned char    set_bank_number_end[] = {0xFB, 0xDC, 0x03, 0x80};
-#endif
 
     const unsigned char    num_bits_wait_and_poll_end = 40;
     const unsigned char    wait_and_poll_end[] = 

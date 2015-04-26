@@ -33,8 +33,6 @@
 #ifndef INC_ISSP_DEFS
 #define INC_ISSP_DEFS
 
-#include "issp_directives.h"
-
 // Block-Verify Uses 64-Bytes of RAM
 #define TARGET_DATABUFF_LEN    64 
 

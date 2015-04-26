@@ -33,7 +33,6 @@
 #ifndef INC_ISSP_EXTERN
 #define INC_ISSP_EXTERN
 
-#include "issp_directives.h"
 #include "Arduino.h"
 
 extern signed char fXRESInitializeTargetForISSP(void);
@@ -56,9 +55,7 @@ extern signed char fLoadSecurityData(unsigned char);
 extern unsigned char fSDATACheck(void);
 extern void SCLKHigh(void);
 extern void SCLKLow(void);
-#ifndef RESET_MODE  //only needed when power cycle mode 
-  extern void SetSCLKHiZ(void);
-#endif 
+extern void SetSCLKHiZ(void);
 extern void SetSCLKStrong(void);
 extern void SetSDATAHigh(void);
 extern void SetSDATALow(void);
@@ -72,6 +69,43 @@ extern void RemoveTargetVDD(void);
 extern void SetTargetVDDStrong(void);
 
 extern unsigned char   fIsError;
+
+// This enumeration causes the proper Initialization vector #3 to be sent
+// to the Target, based on what the Target Vdd programming voltage will
+// be. Either 5V or 3.3V.
+enum target_voltage {
+  TARGET_VOLTAGE_5V,
+  TARGET_VOLTAGE_3_3V,
+} extern targ_voltage;
+
+// This enumeration selects whether code that uses reset programming mode or code
+// that uses power cycle programming is use. Reset programming mode uses the
+// external reset pin (XRES) to enter programming mode. Power cycle programming
+// mode uses the power-on reset to enter programming mode.
+// Applying signals to various pins on the target device must be done in a 
+// deliberate order when using power cycle mode. Otherwise, high signals to GPIO
+// pins on the target will power the PSoC through the protection diodes.
+enum programming_mode {
+    RESET_MODE,
+    POWER_CYCLE_MODE,
+} extern prog_mode;
+
+// The boolean below is used to control switching banks if the device
+// has multiple banks of Flash.
+extern bool multi_bank;
+
+// The enumerations below are used to define various sets of vectors that differ
+// for more than one set of PSoC parts.
+enum checksum_setup {
+  CHECKSUM_SETUP_21_23_27_TST110_TMG110, // CY8C21x23, CY8C21x34, CY8C23x33, CY8C27x43, TST110 & TMG110 Checksum Setup Vectors
+  CHECKSUM_SETUP_22_24_28_29_TST120_TMG120_TMA120, // CY8C21x45,CY8C22x45,CY8C24x94, CY8C28xxx, CY8C29x66, TST120, TMG120, & TMA120 Checksum Setup Vectors
+  CHECKSUM_SETUP_24_24A // CY8C24x23 & CY8C24x23A Checksum Setup Vectors
+} extern chksm_setup;
+
+enum program_block {
+  PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA, // CY8C21xxx, CY8C21x45, CY8C22x45, CY8C23x33, CY8C24x23A, CY8C24x94, CY8C28xxx, CY8C29x66, TST1x0, TMG1x0, & TMA120 Program Block Vectors 
+  PROGRAM_BLOCK_27 //  CY8C27x43 Program Block Vectors
+} extern prgm_block;
 
 #endif  //(INC_ISSP_EXTERN)
 

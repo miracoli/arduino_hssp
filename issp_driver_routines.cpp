@@ -34,7 +34,6 @@
 
 #include "issp_defs.h"
 #include "issp_errors.h"
-#include "issp_directives.h"
 
 extern    unsigned char    bTargetDataPtr;
 extern    unsigned char    abTargetDataOUT[TARGET_DATABUFF_LEN];
@@ -194,7 +193,6 @@ void SCLKLow(void)
     digitalWrite(SCLK_PIN, LOW);
 }
 
-#ifndef RESET_MODE  // Only needed for power cycle mode
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
 // ****************************************************************************
 // ****                        PROCESSOR SPECIFIC                          ****
@@ -209,7 +207,6 @@ void SetSCLKHiZ(void)
     pinMode(SCLK_PIN, INPUT);
     digitalWrite(SCLK_PIN, LOW);
 }
-#endif
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
 // ****************************************************************************
@@ -292,7 +289,6 @@ void SetSDATAStrong(void)
     pinMode(SDATA_PIN, OUTPUT);
 }
 
-#ifdef RESET_MODE
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
 // ****************************************************************************
 // ****                        PROCESSOR SPECIFIC                          ****
@@ -334,7 +330,6 @@ void DeassertXRES(void)
 {
     digitalWrite(XRES_PIN, LOW);
 }
-#else
 
 // ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
 // ****************************************************************************
@@ -377,5 +372,4 @@ void RemoveTargetVDD(void)
 {
     digitalWrite(TARGET_VDD, LOW);
 }
-#endif
 

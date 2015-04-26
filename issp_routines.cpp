@@ -35,7 +35,6 @@
 #include "issp_vectors.h"
 #include "issp_extern.h"
 #include "issp_errors.h"
-#include "issp_directives.h"
 #include "issp_delays.h"
 
 unsigned char  bTargetDataIN;
@@ -253,7 +252,6 @@ signed char fDetectHiLoTransition(void)
    (( these routines do not need to be modified.                             ))
    (((((((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))))))))))*/
 
-#ifdef RESET_MODE
 // ============================================================================
 // fXRESInitializeTargetForISSP()
 // Implements the intialization vectors for the device.
@@ -296,11 +294,11 @@ signed char fXRESInitializeTargetForISSP(void)
     SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);      
      
     // Send Initialize 3 Vector NOTE: the proper vector based on Vdd of target
-#ifdef TARGET_VOLTAGE_IS_5V
+    if(targ_voltage == TARGET_VOLTAGE_5V) {
     SendVector(init3_5v, num_bits_init3_5v);          // Target Vdd = 5v
-#else
+    } else {
     SendVector(init3_3v, num_bits_init3_3v);          // Target Vdd = 3.3v
-#endif
+    }
 
     SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);
 
@@ -308,8 +306,6 @@ signed char fXRESInitializeTargetForISSP(void)
     //       it does not occur (per spec).
     return(PASS);
 }
-
-#else  //else = the part is power cycle programmed
 
 // ============================================================================
 // fPowerCycleInitializeTargetForISSP()
@@ -384,7 +380,6 @@ signed char fPowerCycleInitializeTargetForISSP(void)
     //       it does not occur (per spec).
     return(PASS);
 }
-#endif
 
 
 // ============================================================================
@@ -488,8 +483,6 @@ unsigned int  iChecksumData = 0;
     return(iChecksumData);
 }
 
-
-#ifdef MULTI_BANK
 // ============================================================================
 // SetBankNumber()
 // Set the bank number in the target device.
@@ -506,8 +499,6 @@ void SetBankNumber(unsigned char bBankNumber)
     SendByte(bBankNumber,8);
     SendVector(set_bank_number_end, 25);
 }
-#endif
-
 
 // ============================================================================
 // fProgramTargetBlock()
@@ -528,6 +519,13 @@ signed char fProgramTargetBlock(unsigned char bBankNumber, unsigned char bBlockN
     SendByte(set_block_number_end, 3);
 
     // Send the program-block vector.
+    if(prgm_block == PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA) {
+      program_block[1] = 0x8A;
+      program_block[2] = 0x9E;
+    } else {
+      program_block[1] = 0x82;
+      program_block[2] = 0xBE;
+    }
     SendVector(program_block, num_bits_program_block);
     // wait for acknowledge from target.
     if (fIsError = fDetectHiLoTransition()) {
@@ -548,6 +546,17 @@ signed char fProgramTargetBlock(unsigned char bBankNumber, unsigned char bBlockN
 // ============================================================================
 signed char fAccTargetBankChecksum(unsigned int* pAcc)
 {
+  if(chksm_setup==CHECKSUM_SETUP_22_24_28_29_TST120_TMG120_TMA120) {
+    checksum_v[17] = 0xF6;
+    checksum_v[26] = 0x40;
+  } else if(chksm_setup==CHECKSUM_SETUP_24_24A) {
+    checksum_v[17] = 0xF7;
+    checksum_v[26] = 0x20;
+  } else {
+    checksum_v[17] = 0xF7;
+    checksum_v[26] = 0x00;
+  }
+
     SendVector(checksum_v, num_bits_checksum); 
     if (fIsError = fDetectHiLoTransition()) {
         return(VERIFY_ERROR);
@@ -576,12 +585,12 @@ signed char fAccTargetBankChecksum(unsigned int* pAcc)
 // ============================================================================
 void ReStartTarget(void)
 {
-#ifdef RESET_MODE
+  if(prog_mode == RESET_MODE) {
     // Assert XRES, then release, then disable XRES-Enable
     AssertXRES();
     delayMicroseconds(XRES_CLK_DELAY);
     DeassertXRES();
-#else
+  } else {
     // Set all pins to highZ to avoid back powering the PSoC through the GPIO
     // protection diodes.
     SetSCLKHiZ();   
@@ -590,7 +599,7 @@ void ReStartTarget(void)
     RemoveTargetVDD();
     delayMicroseconds(POWER_CYCLE_DELAY);
     ApplyTargetVDD();
-#endif
+  }
 }
 
 

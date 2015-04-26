@@ -327,7 +327,6 @@
 // ------ Declarations Associated with ISSP Files & Routines -------
 //     Add these to your project as needed.
 #include "issp_extern.h"
-#include "issp_directives.h"
 #include "issp_defs.h"
 #include "issp_errors.h"
 /* ------------------------------------------------------------------------- */
@@ -337,6 +336,11 @@ unsigned int  iBlockCounter;
 unsigned int  iChecksumData;
 unsigned int  iChecksumTarget;
 
+programming_mode prog_mode;
+target_voltage targ_voltage;
+bool multi_bank = false;
+checksum_setup chksm_setup;
+program_block prgm_block;
 
 /* ========================================================================= */
 // ErrorTrap()
@@ -368,6 +372,10 @@ void setup()
 {
     bit = digitalPinToBitMask(SDATA_PIN);
     out = portOutputRegister(digitalPinToPort(SDATA_PIN));
+  prog_mode = POWER_CYCLE_MODE;
+  targ_voltage = TARGET_VOLTAGE_5V;
+  chksm_setup = CHECKSUM_SETUP_21_23_27_TST110_TMG110;
+  prgm_block = PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA;
 }
 
 /* ========================================================================= */
