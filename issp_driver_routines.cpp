@@ -379,34 +379,3 @@ void RemoveTargetVDD(void)
 }
 #endif
 
-#ifdef USE_TP
-// ********************* LOW-LEVEL ISSP SUBROUTINE SECTION ********************
-// ****************************************************************************
-// ****                        PROCESSOR SPECIFIC                          ****
-// ****************************************************************************
-// ****                      USER ATTENTION REQUIRED                       ****
-// ****************************************************************************
-// A "Test Point" sets a GPIO pin of the host processor high or low.
-// This GPIO pin can be observed with an oscilloscope to verify the timing of
-// key programming steps. TPs have been added in main() that set Port 0, pin 1
-// high during bulk erase, during each block write and during security write.
-// The timing of these programming steps should be verified as correct as part
-// of the validation process of the final program.
-// ****************************************************************************
-void InitTP(void)
-{
-    pinMode(TP_PIN, OUTPUT);
-}
-void SetTPHigh(void)
-{
-    digitalWrite(TP_PIN, HIGH);
-}
-void SetTPLow(void)
-{
-    digitalWrite(TP_PIN, LOW);
-}
-void ToggleTP(void)
-{
-    digitalWrite(TP_PIN, !digitalRead(TP_PIN));
-}
-#endif

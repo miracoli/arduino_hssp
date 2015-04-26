@@ -312,14 +312,6 @@
  freqency. In other words, if the maximum SCLK frequency is 8MHz, there can be
  no high or low pulses shorter than 1/(2*8MHz), or 62.5 nsec.
 
- The test point (TP) functions, enabled by the define USE_TP, provide an output
- from the host processor that brackets the timing of the internal bulk erase,
- block write and security write programming pulses. An oscilloscope, along with
- break points in the PSoC ICE Debugger should be used to verify the timing of 
- the programming.  The Application Note, "Host-Sourced Serial Programming"
- explains how to do these measurements and should be consulted for the expected
- timing of the erase and program pulses.
-
 /* ############################################################################
    ############################################################################ 
 
@@ -388,10 +380,6 @@ void loop()
     // -- This example section of commands show the high-level calls to -------
     // -- perform Target Initialization, SilcionID Test, Bulk-Erase, Target ---
     // -- RAM Load, FLASH-Block Program, and Target Checksum Verification. ----
-
-    #ifdef USE_TP
-    InitTP();
-    #endif
     
     // >>>> ISSP Programming Starts Here <<<<
     
@@ -416,16 +404,10 @@ void loop()
     }
 	
     // Bulk-Erase the Device.
-    #ifdef USE_TP
-    SetTPHigh();    // Only used of Test Points are enabled  
-    #endif
     Serial.println("Bulk-Erase the Device.");
     if (fIsError = fEraseTarget()) {
         ErrorTrap(fIsError);
     }
-    #ifdef USE_TP
-    SetTPLow();    // Only used of Test Points are enabled
-    #endif
 	
     // Program Flash blocks with predetermined data. In the final application
     // this data should come from the HEX output of PSoC Designer.
@@ -440,15 +422,9 @@ void loop()
         for (iBlockCounter=0; iBlockCounter<BLOCKS_PER_BANK; iBlockCounter++) {
             LoadProgramData((unsigned char)iBlockCounter, bBankCounter);
             iChecksumData += iLoadTarget();
-            #ifdef USE_TP
-            SetTPHigh();    // Only used of Test Points are enabled 
-            #endif
             if (fIsError = fProgramTargetBlock(bBankCounter,(unsigned char)iBlockCounter)) {
                 ErrorTrap(fIsError);				
             }
-        #ifdef USE_TP
-        SetTPLow();    // Only used of Test Points are enabled  
-        #endif
         }
     }
 	
@@ -493,9 +469,6 @@ void loop()
     // Run the Target-Checksum Verification, and proceed according to result.
     // Checksum only valid if every Flash block is programed
     Serial.println("Run the Target-Checksum Verification");
-    #ifdef USE_TP
-    SetTPHigh();    // Only used of Test Points are enabled
-    #endif
     iChecksumTarget = 0;
     for (bBankCounter=0; bBankCounter<NUM_BANKS; bBankCounter++)
     {
@@ -509,9 +482,6 @@ void loop()
     }    
     if (iChecksumTarget != iChecksumData)
         ErrorTrap(VERIFY_ERROR);
-    #ifdef USE_TP
-    SetTPLow();    // Only used of Test Points are enabled 
-    #endif
 
     
     // *** SUCCESS *** 

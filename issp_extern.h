@@ -73,12 +73,5 @@ extern void SetTargetVDDStrong(void);
 
 extern unsigned char   fIsError;
 
-#ifdef USE_TP
-extern void InitTP(void);
-extern void SetTPHigh(void);
-extern void SetTPLow(void);
-extern void ToggleTP(void);
-#endif
-
 #endif  //(INC_ISSP_EXTERN)
 
