@@ -329,6 +329,7 @@
 #include "issp_extern.h"
 #include "issp_defs.h"
 #include "issp_errors.h"
+#include "stk500_protocol.h"
 
 unsigned char bBankCounter;
 unsigned int  iBlockCounter;
@@ -340,14 +341,6 @@ target_voltage targ_voltage;
 bool multi_bank = false;
 checksum_setup chksm_setup;
 program_block prgm_block;
-
-// STK Definitions
-#define STK_OK      0x10
-#define STK_FAILED  0x11
-#define STK_UNKNOWN 0x12
-#define STK_INSYNC  0x14
-#define STK_NOSYNC  0x15
-#define CRC_EOP     0x20 //ok it is a space...
 
 #define HWVER 2
 #define SWMAJ 1
@@ -384,25 +377,25 @@ parameter;
 parameter param;
 
 void empty_reply() {
-  if (CRC_EOP == getch()) {
-    Serial.print((char)STK_INSYNC);
-    Serial.print((char)STK_OK);
+  if (Sync_CRC_EOP == getch()) {
+    Serial.print((char)Resp_STK_INSYNC);
+    Serial.print((char)Resp_STK_OK);
   } 
   else {
     error++;
-    Serial.print((char)STK_NOSYNC);
+    Serial.print((char)Resp_STK_NOSYNC);
   }
 }
     
 void breply(uint8_t b) {
-  if (CRC_EOP == getch()) {
-    Serial.print((char)STK_INSYNC);
+  if (Sync_CRC_EOP == getch()) {
+    Serial.print((char)Resp_STK_INSYNC);
     Serial.print((char)b);
-    Serial.print((char)STK_OK);
+    Serial.print((char)Resp_STK_OK);
   } 
   else {
     error++;
-    Serial.print((char)STK_NOSYNC);
+    Serial.print((char)Resp_STK_NOSYNC);
   }
 }
     
@@ -482,40 +475,40 @@ int8_t start_pmode() {
     }
 	
 void read_signature() {
-  if (CRC_EOP != getch()) {
+  if (Sync_CRC_EOP != getch()) {
     error++;
-    Serial.print((char) STK_NOSYNC);
+    Serial.print((char) Resp_STK_NOSYNC);
     return;
             }
 
   if(getSiliconID(buff)) {
-    Serial.print((char) STK_FAILED);
+    Serial.print((char) Resp_STK_FAILED);
     return;
         }
-  Serial.print((char) STK_INSYNC);
+  Serial.print((char) Resp_STK_INSYNC);
   Serial.print((char) buff[0]);
   Serial.print((char) buff[1]);
-  Serial.print((char) STK_OK);
+  Serial.print((char) Resp_STK_OK);
     }
 
 char flash_read_page(int length) {
   for (uint8_t x = 0; x < length; x++) {
     Serial.write(readByte(x));
   }
-  return STK_OK;
+  return Resp_STK_OK;
 }
 
 void read_page() {
-  char result = (char)STK_FAILED;
+  char result = (char)Resp_STK_FAILED;
   int length = 256 * getch();
   length += getch();
   char memtype = getch();
-  if (CRC_EOP != getch()) {
+  if (Sync_CRC_EOP != getch()) {
     error++;
-    Serial.print((char) STK_NOSYNC);
+    Serial.print((char) Resp_STK_NOSYNC);
     return;
   }
-  Serial.print((char) STK_INSYNC);
+  Serial.print((char) Resp_STK_INSYNC);
   if (memtype == 'F') result = flash_read_page(length);
 
   Serial.print(result);
@@ -529,18 +522,18 @@ uint8_t write_flash_pages(int length) {
         }
   iLoadTarget();
   fProgramTargetBlock(0,here);
-  return STK_OK;
+  return Resp_STK_OK;
     }
 	
 void write_flash(int length) {
   fill(length);
-  if (CRC_EOP == getch()) {
-    Serial.print((char) STK_INSYNC);
+  if (Sync_CRC_EOP == getch()) {
+    Serial.print((char) Resp_STK_INSYNC);
     Serial.print((char) write_flash_pages(length));
   } 
   else {
     error++;
-    Serial.print((char) STK_NOSYNC);
+    Serial.print((char) Resp_STK_NOSYNC);
         }
     }    
 
@@ -554,9 +547,9 @@ void program_page() {
     return;
   } else {
     error++;
-    Serial.print((char) STK_NOSYNC);
+    Serial.print((char) Resp_STK_NOSYNC);
   }
-  Serial.print((char)STK_FAILED);
+  Serial.print((char)Resp_STK_FAILED);
   return;
 }
     
@@ -588,10 +581,10 @@ int avrisp() {
     empty_reply();
     break;
   case '1':
-    if (getch() == CRC_EOP) {
-      Serial.print((char) STK_INSYNC);
+    if (getch() == Sync_CRC_EOP) {
+      Serial.print((char) Resp_STK_INSYNC);
       Serial.print("AVR ISP");
-      Serial.print((char) STK_OK);
+      Serial.print((char) Resp_STK_OK);
     }
     break;
   case 'A':
@@ -636,20 +629,20 @@ int avrisp() {
     read_signature();
     break;
 
-    // expecting a command, not CRC_EOP
+    // expecting a command, not Sync_CRC_EOP
     // this is how we can get back in sync
-  case CRC_EOP:
+  case Sync_CRC_EOP:
     error++;
-    Serial.print((char) STK_NOSYNC);
+    Serial.print((char) Resp_STK_NOSYNC);
     break;
 
-    // anything else we will return STK_UNKNOWN
+    // anything else we will return Resp_STK_UNKNOWN
   default:
     error++;
-    if (CRC_EOP == getch()) 
-      Serial.print((char)STK_UNKNOWN);
+    if (Sync_CRC_EOP == getch()) 
+      Serial.print((char)Resp_STK_UNKNOWN);
     else
-      Serial.print((char)STK_NOSYNC);
+      Serial.print((char)Resp_STK_NOSYNC);
 } 
 }
 
