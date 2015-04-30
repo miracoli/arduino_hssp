@@ -405,21 +405,21 @@ void fill(int n) {
     }
     }
 
-void get_version(uint8_t c) {
+void get_parameter(uint8_t c) {
   switch(c) {
-  case 0x80:
+  case Parm_STK_HW_VER:
     breply(HWVER);
     break;
-  case 0x81:
+  case Parm_STK_SW_MAJOR:
     breply(SWMAJ);
     break;
-  case 0x82:
+  case Parm_STK_SW_MINOR:
     breply(SWMIN);
     break;
-  case 0x93:
+  case Parm_STK_PROGMODE:
     breply('S'); // serial programmer
     break;
-  case 0x84:
+  case Parm_STK_VTARGET:
     breply(50);
   default:
     breply(0);
@@ -588,7 +588,7 @@ int avrisp() {
     }
     break;
   case Cmnd_STK_GET_PARAMETER:
-    get_version(getch());
+    get_parameter(getch());
     break;
   case Cmnd_STK_SET_DEVICE:
     fill(20);
