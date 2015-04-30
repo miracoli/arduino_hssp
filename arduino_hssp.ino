@@ -576,56 +576,56 @@ int avrisp() {
   uint8_t data, low, high;
   uint8_t ch = getch();
   switch (ch) {
-  case '0': // signon
+  case Cmnd_STK_GET_SYNC: // signon
     error = 0;
     empty_reply();
     break;
-  case '1':
+  case Cmnd_STK_GET_SIGN_ON:
     if (getch() == Sync_CRC_EOP) {
       Serial.print((char) Resp_STK_INSYNC);
       Serial.print("AVR ISP");
       Serial.print((char) Resp_STK_OK);
     }
     break;
-  case 'A':
+  case Cmnd_STK_GET_PARAMETER:
     get_version(getch());
     break;
-  case 'B':
+  case Cmnd_STK_SET_DEVICE:
     fill(20);
     set_parameters();
     empty_reply();
     break;
-  case 'E': // extended parameters - ignore for now
+  case Cmnd_STK_SET_DEVICE_EXT: // extended parameters - ignore for now
     fill(5);
     empty_reply();
     break;
-  case 'P':
+  case Cmnd_STK_ENTER_PROGMODE:
     start_pmode();
     empty_reply();
     break;
-  case 'R':
+  case Cmnd_STK_CHIP_ERASE:
     erase_chip();
     empty_reply();
     break;
-  case 'U': // set address (word)
+  case Cmnd_STK_LOAD_ADDRESS: // set address (word)
     here = getch();
     here += 256 * getch();
     here /= 64;
     setAddress(0, (here)); // TODO support for multiple banks
     empty_reply();
     break;
-  case 0x64: //STK_PROG_PAGE
+  case Cmnd_STK_PROG_PAGE:
     program_page();
     break;
-  case 0x74: //STK_READ_PAGE 't'
+  case Cmnd_STK_READ_PAGE:
     read_page();    
     break;
-  case 'Q': //0x51
+  case Cmnd_STK_LEAVE_PROGMODE:
     error=0;
     end_pmode();
     empty_reply();
     break;
-  case 0x75: //STK_READ_SIGN 'u'
+  case Cmnd_STK_READ_SIGN:
     read_signature();
     break;
 
@@ -643,7 +643,7 @@ int avrisp() {
       Serial.print((char)Resp_STK_UNKNOWN);
     else
       Serial.print((char)Resp_STK_NOSYNC);
-} 
+  }
 }
 
 
