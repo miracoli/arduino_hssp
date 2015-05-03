@@ -336,11 +336,7 @@ unsigned int  iBlockCounter;
 unsigned int  iChecksumData;
 unsigned int  iChecksumTarget;
 
-programming_mode prog_mode;
-target_voltage targ_voltage;
-bool multi_bank = false;
-checksum_setup chksm_setup;
-program_block prgm_block;
+parameter param;
 
 #define HWVER 2
 #define SWMAJ 1
@@ -356,25 +352,7 @@ int pmode=0;
 int here;
 uint8_t buff[256]; // global block storage
 
-#define beget16(addr) (*addr * 256 + *(addr+1) )
-typedef struct param {
-  uint8_t devicecode;
-  uint8_t revision;
-  uint8_t progtype;
-  uint8_t parmode;
-  uint8_t polling;
-  uint8_t selftimed;
-  uint8_t lockbytes;
-  uint8_t fusebytes;
-  int flashpoll;
-  int eeprompoll;
-  int pagesize;
-  int eepromsize;
-  int flashsize;
-}
-parameter;
 
-parameter param;
 
 void empty_reply() {
   if (Sync_CRC_EOP == getch()) {
@@ -428,29 +406,12 @@ void get_parameter(uint8_t c) {
 
 void set_parameters() {
   // call this after reading paramter packet into buff[]
-  // TODO
-  /* param.devicecode = buff[0];
-   param.revision   = buff[1];
-   param.progtype   = buff[2];
-   param.parmode    = buff[3];
-   param.polling    = buff[4];
-   param.selftimed  = buff[5];
-   param.lockbytes  = buff[6];
-   param.fusebytes  = buff[7];
-   param.flashpoll  = buff[8]; 
-   // ignore buff[9] (= buff[8])
-   // following are 16 bits (big endian)
-   param.eeprompoll = beget16(&buff[10]);
-   param.pagesize   = beget16(&buff[12]);
-   param.eepromsize = beget16(&buff[14]);
-   
-   // 32 bits flashsize (big endian)
-   param.flashsize = buff[16] * 0x01000000
-   + buff[17] * 0x00010000
-   + buff[18] * 0x00000100
-   + buff[19];
-   */
-    }
+  param.prog_mode = (programming_mode) buff[0];
+  param.targ_voltage = (target_voltage) buff[1];
+  param.chksm_setup = (checksum_setup) buff[2];
+  param.prgm_block = (prg_block) buff[3];
+  param.multi_bank = (boolean) buff[4];
+}
 	
 void end_pmode() {
   ReStartTarget();
@@ -464,7 +425,7 @@ int8_t erase_chip() {
 int8_t start_pmode() {
   // Acquire the device through reset or power cycle
   int8_t result;
-  if(prog_mode == RESET_MODE) {
+  if(param.prog_mode == RESET_MODE) {
     result = fXRESInitializeTargetForISSP();
   } 
   else {
@@ -559,10 +520,11 @@ void setup()
 {
   bit = digitalPinToBitMask(SDATA_PIN);
   out = portOutputRegister(digitalPinToPort(SDATA_PIN));
-  prog_mode = POWER_CYCLE_MODE;
-  targ_voltage = TARGET_VOLTAGE_5V;
-  chksm_setup = CHECKSUM_SETUP_21_23_27_TST110_TMG110;
-  prgm_block = PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA;
+  param.prog_mode = POWER_CYCLE_MODE;
+  param.targ_voltage = TARGET_VOLTAGE_5V;
+  param.chksm_setup = CHECKSUM_SETUP_21_23_27_TST110_TMG110;
+  param.prgm_block = PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA;
+  param.multi_bank = false;
   Serial.begin(57600);
 }
 
@@ -591,7 +553,7 @@ int avrisp() {
     get_parameter(getch());
     break;
   case Cmnd_STK_SET_DEVICE:
-    fill(20);
+    fill(5);
     set_parameters();
     empty_reply();
     break;

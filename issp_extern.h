@@ -105,10 +105,22 @@ enum checksum_setup {
   CHECKSUM_SETUP_24_24A // CY8C24x23 & CY8C24x23A Checksum Setup Vectors
 } extern chksm_setup;
 
-enum program_block {
+enum prg_block {
   PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA, // CY8C21xxx, CY8C21x45, CY8C22x45, CY8C23x33, CY8C24x23A, CY8C24x94, CY8C28xxx, CY8C29x66, TST1x0, TMG1x0, & TMA120 Program Block Vectors 
   PROGRAM_BLOCK_27 //  CY8C27x43 Program Block Vectors
 } extern prgm_block;
+
+typedef struct  {
+  programming_mode prog_mode;
+  target_voltage targ_voltage;
+  bool multi_bank;
+  checksum_setup chksm_setup;
+  prg_block prgm_block;
+}
+parameter;
+
+
+extern parameter param;
 
 extern    unsigned char    bTargetDataPtr;
 extern    unsigned char    abTargetDataOUT[TARGET_DATABUFF_LEN];

@@ -1,4 +1,4 @@
 - Add support for programming/verifying flash security data
-- Add support for parametrization by host
 - Clean things up
+- Add comments
 - Add support for multi bank programming (need a multi bank device first)

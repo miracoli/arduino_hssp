@@ -294,7 +294,7 @@ signed char fXRESInitializeTargetForISSP(void)
     SendVector(wait_and_poll_end, num_bits_wait_and_poll_end);      
      
     // Send Initialize 3 Vector NOTE: the proper vector based on Vdd of target
-    if(targ_voltage == TARGET_VOLTAGE_5V) {
+    if(param.targ_voltage == TARGET_VOLTAGE_5V) {
     SendVector(init3_5v, num_bits_init3_5v);          // Target Vdd = 5v
     } else {
     SendVector(init3_3v, num_bits_init3_3v);          // Target Vdd = 3.3v
@@ -537,7 +537,7 @@ signed char fProgramTargetBlock(unsigned char bBankNumber, unsigned char bBlockN
     SendByte(set_block_number_end, 3);
 
     // Send the program-block vector.
-    if(prgm_block == PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA) {
+    if(param.prgm_block == PROGRAM_BLOCK_21_22_23_24_28_29_TST_TMG_TMA) {
       program_block[1] = 0x8A;
       program_block[2] = 0x9E;
     } else {
@@ -603,7 +603,7 @@ signed char fAccTargetBankChecksum(unsigned int* pAcc)
 // ============================================================================
 void ReStartTarget(void)
 {
-  if(prog_mode == RESET_MODE) {
+  if(param.prog_mode == RESET_MODE) {
     // Assert XRES, then release, then disable XRES-Enable
     AssertXRES();
     delayMicroseconds(XRES_CLK_DELAY);
