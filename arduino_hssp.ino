@@ -523,11 +523,11 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    avrisp();
+    psocisp();
   }
 }
 
-int avrisp() {
+int psocisp() {
   uint8_t data, low, high;
   uint8_t ch = getch();
   switch (ch) {
