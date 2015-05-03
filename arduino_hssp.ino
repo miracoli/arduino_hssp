@@ -331,6 +331,10 @@
 #include "issp_errors.h"
 #include "stk500_protocol.h"
 
+#define HWVER 2
+#define SWMAJ 1
+#define SWMIN 18
+
 unsigned char bBankCounter;
 unsigned int  iBlockCounter;
 unsigned int  iChecksumData;
@@ -338,69 +342,63 @@ unsigned int  iChecksumTarget;
 
 parameter param;
 
-#define HWVER 2
-#define SWMAJ 1
-#define SWMIN 18
+int error=0;
+int pmode=0;
+int here;
+uint8_t buff[256]; // global block storage
+unsigned char bit;
+volatile unsigned char *out;
 
 uint8_t getch() {
   while(!Serial.available());
   return Serial.read();
 }
 
-int error=0;
-int pmode=0;
-int here;
-uint8_t buff[256]; // global block storage
-
-
-
 void empty_reply() {
   if (Sync_CRC_EOP == getch()) {
     Serial.print((char)Resp_STK_INSYNC);
     Serial.print((char)Resp_STK_OK);
-  } 
-  else {
+  } else {
     error++;
     Serial.print((char)Resp_STK_NOSYNC);
   }
 }
-    
+
 void breply(uint8_t b) {
   if (Sync_CRC_EOP == getch()) {
     Serial.print((char)Resp_STK_INSYNC);
     Serial.print((char)b);
     Serial.print((char)Resp_STK_OK);
-  } 
-  else {
+  } else {
     error++;
     Serial.print((char)Resp_STK_NOSYNC);
   }
 }
-    
+
 void fill(int n) {
   for (int x = 0; x < n; x++) {
     buff[x] = getch();
-    }
-    }
+  }
+}
 
 void get_parameter(uint8_t c) {
   switch(c) {
-  case Parm_STK_HW_VER:
-    breply(HWVER);
-    break;
-  case Parm_STK_SW_MAJOR:
-    breply(SWMAJ);
-    break;
-  case Parm_STK_SW_MINOR:
-    breply(SWMIN);
-    break;
-  case Parm_STK_PROGMODE:
-    breply('S'); // serial programmer
-    break;
-  case Parm_STK_VTARGET:
-    breply(50);
-  default:
-    breply(0);
+    case Parm_STK_HW_VER:
+      breply(HWVER);
+      break;
+    case Parm_STK_SW_MAJOR:
+      breply(SWMAJ);
+      break;
+    case Parm_STK_SW_MINOR:
+      breply(SWMIN);
+      break;
+    case Parm_STK_PROGMODE:
+      breply('S'); // serial programmer
+      break;
+    case Parm_STK_VTARGET:
+      breply(50);
+    default:
+      breply(0);
   }
 }
 
@@ -412,14 +410,14 @@ void set_parameters() {
   param.prgm_block = (prg_block) buff[3];
   param.multi_bank = (boolean) buff[4];
 }
-	
+
 void end_pmode() {
   ReStartTarget();
-    }
-	
+}
+
 int8_t erase_chip() {
   return fEraseTarget();
-            }
+}
 
 // Initialize the Host & Target for ISSP operations
 int8_t start_pmode() {
@@ -427,30 +425,29 @@ int8_t start_pmode() {
   int8_t result;
   if(param.prog_mode == RESET_MODE) {
     result = fXRESInitializeTargetForISSP();
-  } 
-  else {
+  } else {
     result = fPowerCycleInitializeTargetForISSP();
-        }
+  }
   pmode = 1;
   return result;
-    }
-	
+}
+
 void read_signature() {
   if (Sync_CRC_EOP != getch()) {
     error++;
     Serial.print((char) Resp_STK_NOSYNC);
     return;
-            }
+  }
 
   if(getSiliconID(buff)) {
     Serial.print((char) Resp_STK_FAILED);
     return;
-        }
+  }
   Serial.print((char) Resp_STK_INSYNC);
   Serial.print((char) buff[0]);
   Serial.print((char) buff[1]);
   Serial.print((char) Resp_STK_OK);
-    }
+}
 
 char flash_read_page(int length) {
   for (uint8_t x = 0; x < length; x++) {
@@ -470,33 +467,32 @@ void read_page() {
     return;
   }
   Serial.print((char) Resp_STK_INSYNC);
-  if (memtype == 'F') result = flash_read_page(length);
-
+  if (memtype == 'F') {
+    result = flash_read_page(length);
+  }
   Serial.print(result);
   return;
-        }
+}
 
 uint8_t write_flash_pages(int length) {
-  //InitTargetTestData(buff);
   for (bTargetDataPtr = 0; bTargetDataPtr < TARGET_DATABUFF_LEN; bTargetDataPtr++) {
-    abTargetDataOUT[bTargetDataPtr] = buff[bTargetDataPtr] ;
-        }
+    abTargetDataOUT[bTargetDataPtr] = buff[bTargetDataPtr];
+  }
   iLoadTarget();
-  fProgramTargetBlock(0,here);
+  fProgramTargetBlock(0, here);
   return Resp_STK_OK;
-    }
-	
+}
+
 void write_flash(int length) {
   fill(length);
   if (Sync_CRC_EOP == getch()) {
     Serial.print((char) Resp_STK_INSYNC);
     Serial.print((char) write_flash_pages(length));
-  } 
-  else {
+  } else {
     error++;
     Serial.print((char) Resp_STK_NOSYNC);
-        }
-    }    
+  }
+}
 
 void program_page() {
   int length = 256 * getch();
@@ -513,11 +509,8 @@ void program_page() {
   Serial.print((char)Resp_STK_FAILED);
   return;
 }
-    
-unsigned char bit;
-volatile unsigned char *out;
-void setup()
-{
+
+void setup() {
   bit = digitalPinToBitMask(SDATA_PIN);
   out = portOutputRegister(digitalPinToPort(SDATA_PIN));
   param.prog_mode = POWER_CYCLE_MODE;
@@ -533,79 +526,77 @@ void loop() {
     avrisp();
   }
 }
- 
-int avrisp() { 
+
+int avrisp() {
   uint8_t data, low, high;
   uint8_t ch = getch();
   switch (ch) {
-  case Cmnd_STK_GET_SYNC: // signon
-    error = 0;
-    empty_reply();
-    break;
-  case Cmnd_STK_GET_SIGN_ON:
-    if (getch() == Sync_CRC_EOP) {
-      Serial.print((char) Resp_STK_INSYNC);
-      Serial.print("AVR ISP");
-      Serial.print((char) Resp_STK_OK);
-    }
-    break;
-  case Cmnd_STK_GET_PARAMETER:
-    get_parameter(getch());
-    break;
-  case Cmnd_STK_SET_DEVICE:
-    fill(5);
-    set_parameters();
-    empty_reply();
-    break;
-  case Cmnd_STK_SET_DEVICE_EXT: // extended parameters - ignore for now
-    fill(5);
-    empty_reply();
-    break;
-  case Cmnd_STK_ENTER_PROGMODE:
-    start_pmode();
-    empty_reply();
-    break;
-  case Cmnd_STK_CHIP_ERASE:
-    erase_chip();
-    empty_reply();
-    break;
-  case Cmnd_STK_LOAD_ADDRESS: // set address (word)
-    here = getch();
-    here += 256 * getch();
-    here /= 64;
-    setAddress(0, (here)); // TODO support for multiple banks
-    empty_reply();
-    break;
-  case Cmnd_STK_PROG_PAGE:
-    program_page();
-    break;
-  case Cmnd_STK_READ_PAGE:
-    read_page();    
-    break;
-  case Cmnd_STK_LEAVE_PROGMODE:
-    error=0;
-    end_pmode();
-    empty_reply();
-    break;
-  case Cmnd_STK_READ_SIGN:
-    read_signature();
-    break;
+    case Cmnd_STK_GET_SYNC: // signon
+      error = 0;
+      empty_reply();
+      break;
+    case Cmnd_STK_GET_SIGN_ON:
+      if (getch() == Sync_CRC_EOP) {
+        Serial.print((char) Resp_STK_INSYNC);
+        Serial.print("AVR ISP");
+        Serial.print((char) Resp_STK_OK);
+      }
+      break;
+    case Cmnd_STK_GET_PARAMETER:
+      get_parameter(getch());
+      break;
+    case Cmnd_STK_SET_DEVICE:
+      fill(5);
+      set_parameters();
+      empty_reply();
+      break;
+    case Cmnd_STK_SET_DEVICE_EXT: // extended parameters - ignore for now
+      fill(5);
+      empty_reply();
+      break;
+    case Cmnd_STK_ENTER_PROGMODE:
+      start_pmode();
+      empty_reply();
+      break;
+    case Cmnd_STK_CHIP_ERASE:
+      erase_chip();
+      empty_reply();
+      break;
+    case Cmnd_STK_LOAD_ADDRESS: // set address (word)
+      here = getch();
+      here += 256 * getch();
+      here /= 64;
+      setAddress(0, (here)); // TODO support for multiple banks
+      empty_reply();
+      break;
+    case Cmnd_STK_PROG_PAGE:
+      program_page();
+      break;
+    case Cmnd_STK_READ_PAGE:
+      read_page();    
+      break;
+    case Cmnd_STK_LEAVE_PROGMODE:
+      error=0;
+      end_pmode();
+      empty_reply();
+      break;
+    case Cmnd_STK_READ_SIGN:
+      read_signature();
+      break;
 
-    // expecting a command, not Sync_CRC_EOP
-    // this is how we can get back in sync
-  case Sync_CRC_EOP:
-    error++;
-    Serial.print((char) Resp_STK_NOSYNC);
-    break;
+      // expecting a command, not Sync_CRC_EOP
+      // this is how we can get back in sync
+    case Sync_CRC_EOP:
+      error++;
+      Serial.print((char) Resp_STK_NOSYNC);
+      break;
 
-    // anything else we will return Resp_STK_UNKNOWN
-  default:
-    error++;
-    if (Sync_CRC_EOP == getch()) 
-      Serial.print((char)Resp_STK_UNKNOWN);
-    else
-      Serial.print((char)Resp_STK_NOSYNC);
+      // anything else we will return Resp_STK_UNKNOWN
+    default:
+      error++;
+      if (Sync_CRC_EOP == getch()) 
+        Serial.print((char)Resp_STK_UNKNOWN);
+      else
+        Serial.print((char)Resp_STK_NOSYNC);
   }
 }
-
-
